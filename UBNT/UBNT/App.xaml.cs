@@ -13,7 +13,8 @@ namespace UBNT
         {
             InitializeComponent();
 
-            MainPage = new UBNT.MainPage();
+            //MainPage = new UBNT.MainPage();
+            MainPage = new NavigationPage(new Inicio());
         }
 
         protected override void OnStart()
