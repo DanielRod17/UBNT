@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="UBNT.Pages.Dashboard">
+    <ContentPage.Content>
+        <Grid>
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="100" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="100" />
+            </Grid.RowDefinitions>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            
+            <Label Text="One" Grid.Row="0" Grid.Column="0" TextColor="Green" BackgroundColor="Black" />
+            <Label Text="Xamarin Forms Grid Demo" TextColor="Yellow" BackgroundColor="Black" Grid.Row="0" Grid.Column="1" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
+            <Label Text="Xamarin Forms" TextColor="Blue" BackgroundColor="Yellow" Grid.Row="1" Grid.Column="0" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
+            <Label Text="C Sharp Corner" FontSize="Large" Grid.Row="1" Grid.Column="1" TextColor="Yellow" BackgroundColor="Red" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
+            <Label Text="Cross Platform Development" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" TextColor="Blue" BackgroundColor="Yellow" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
+
+        </Grid>
+    </ContentPage.Content>
+</ContentPage>

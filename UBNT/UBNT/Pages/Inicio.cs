@@ -17,20 +17,19 @@ namespace UBNT
     {
         public Inicio()
         {
-            var title = new Label
+            NavigationPage.SetHasNavigationBar(this, false);
+            var image = new Image
             {
-                Text = "Bienvenido",
-                FontSize = Device.GetNamedSize(NamedSize.Large, typeof(Label)),
-                HorizontalOptions = LayoutOptions.CenterAndExpand,
+                Source = "logo.png",
+                HeightRequest = 120,
+                WidthRequest = 50,
+                Aspect = Aspect.AspectFit
             };
             var aboutButton = new Button
             {
-                Text = "Información"
-            };
-
-            var signupButton = new Button
-            {
-                Text = "Registrarse"
+                Text = "Información",
+                BackgroundColor = Color.Black,
+                TextColor = Color.White,
             };
             var email = new Entry
             {
@@ -39,11 +38,14 @@ namespace UBNT
 
             var phone = new Entry
             {
-                Placeholder = "Phone",
+                Placeholder = "Teléfono",
             };
             var login = new Button
             {
-                Text = "Login"
+                BorderRadius = 20,
+                Text = "INICIAR SESIóN",
+                BackgroundColor = Color.Black,
+                TextColor = Color.White,
             };
             login.Clicked += (sender, e) =>
             {
@@ -52,14 +54,25 @@ namespace UBNT
 
             Content = new StackLayout
             {
-                Padding = 30,
+                Padding = 40,
                 Spacing = 10,
-                Children = { title, email, phone, login }
+                Children = { image, email, phone, login,
+                    new StackLayout ()
+                    {
+                        VerticalOptions= LayoutOptions.EndAndExpand,
+                        Padding = 10,
+                        Spacing = 10,
+                        Children =
+                        {
+                            aboutButton
+                        }
+                    },
+                }
             };
         }
         public async void Login(string usernamer, string phone)
         {
-            var json = new StringContent("{ \"user\": \"daniel\",  \"password\": \"luisdaniel\",  \"expiration\": 604800,  \"sliding\": 1,  \"deviceName\": \"iphone X\" }", System.Text.Encoding.UTF8, "application / json");
+            //var json = new StringContent("{ \"user\": \"daniel\",  \"password\": \"luisdaniel\",  \"expiration\": 604800,  \"sliding\": 1,  \"deviceName\": \"iphone X\" }", System.Text.Encoding.UTF8, "application / json");
             var client = new HttpClient()
             {
             };
@@ -68,18 +81,15 @@ namespace UBNT
             try
             {
                 var URI = "https://portal.backnetwork.net/api/v1.0/clients";
-                //URI += "(656)327-6846";
                 using (var response = await client.GetAsync(URI))
                 {
                     var username = usernamer;
                     var ident = phone;
-                    ////////////////////
                     var separators = new string[] { " ", "-", "(", ")" };
                     foreach (var c in separators)
                     {
                        ident = ident.Replace(c, string.Empty);
                     }
-                    ////////////////////
                     string responseData = await response.Content.ReadAsStringAsync();
                     var root = JToken.Parse(responseData);
                     var values = root.Where(innerItem => innerItem["username"].Value<string>() == username)
@@ -88,8 +98,6 @@ namespace UBNT
                            .Select(innerItem => innerItem["accountBalance"])
                     .ToList();
                     var message = string.Join(Environment.NewLine, values);
-                    //var values = root.Where(t =>(string)t["contacts"] == ident).ToList();
-                    //var message = string.Join(Environment.NewLine, values);
                     bool isEmpty = !values.Any();
                     if (isEmpty)
                     {
@@ -101,10 +109,38 @@ namespace UBNT
                         Application.Current.Properties["phone"] = ident;
                         var qoot = JToken.Parse(responseData);
                         var palues = qoot.Where(innerItem => innerItem["username"].Value<string>() == username)
-                        .Select(innerItem => innerItem["accountBalance"])
                         .ToList();
                         var mensage = string.Join(Environment.NewLine, palues);
-                        Application.Current.Properties["Balance"] = mensage;
+                        var mensageJson = JsonConvert.DeserializeObject<JObject>(mensage);
+                        var name = mensageJson["firstName"].ToString();
+                        var last = mensageJson["lastName"].ToString();
+                        name = name + " " + last;
+                        var j = mensageJson["contacts"].ToString();
+                        var accBal = mensageJson["accountBalance"].ToString();
+                        j = j.Remove(0, 1);
+                        j = j.Remove(j.Length - 1);
+                        var jId = JsonConvert.DeserializeObject<JObject>(j);
+                        var clientId = jId["clientId"].ToString();
+                        Application.Current.Properties["Balance"] = accBal;
+                        //////////////////////////////////////////////////////
+                        URI = "https://portal.backnetwork.net/api/v1.0/clients/"+clientId+ "/services";
+                        using (var responso = await client.GetAsync(URI))
+                        {
+                            responseData = await responso.Content.ReadAsStringAsync();
+                            root = JToken.Parse(responseData);
+                            values = root.Where(innerItem => innerItem["clientId"].Value<string>() == clientId)
+                                //.Select(innerItem => innerItem["downloadSpeed"])
+                                    .ToList();
+                            message = string.Join(Environment.NewLine, values);
+                            mensageJson = JsonConvert.DeserializeObject<JObject>(message);
+                            var download = mensageJson["downloadSpeed"].ToString();
+                            var price = mensageJson["price"].ToString();
+                            var factura = mensageJson["invoicingPeriodStartDay"].ToString();
+                            Application.Current.Properties["Download"] = download;
+                            Application.Current.Properties["Factura"] = factura;
+                            Application.Current.Properties["Price"] = price;
+                            Application.Current.Properties["Name"] = name;
+                        }
                         await Navigation.PushModalAsync(new Pages.Bill());
                     }
                 }
